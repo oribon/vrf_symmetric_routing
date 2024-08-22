@@ -1,0 +1,3 @@
+setup/metallb.yaml
+setup/vrf-nncps.yaml
+setup/frr/frr.conf

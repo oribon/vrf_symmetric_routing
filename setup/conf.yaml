@@ -1,0 +1,9 @@
+intf: "" # The name of the secondary network interface on the worker nodes.
+worker0:
+  nodeName: "" #  The full node name of worker0.
+  ip: "" # The IP configured for the secondary network interface on worker0.
+worker1:
+  nodeName: "" #  The full node name of worker1.
+  ip: "" # The IP configured for the secondary network interface on worker1.
+externalHostIP: "" # The IP configured for the secondary network interface on the external host.
+secondaryNetGW: "" # The default gateway for the secondary network.

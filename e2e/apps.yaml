@@ -1,0 +1,118 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: the-namespace
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: the-local-deployment
+  namespace: the-namespace
+  labels:
+    app: the-local-app
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: the-local-app
+  template:
+    metadata:
+      labels:
+        app: the-local-app
+    spec:
+      containers:
+      - name: agnhost
+        image: registry.k8s.io/e2e-test-images/agnhost:2.31
+        command:
+          - /agnhost
+          - netexec
+          - --http-port=9090
+        ports:
+        - containerPort: 9090
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: the-local-service
+  namespace: the-namespace
+  annotations:
+    metallb.universe.tf/address-pool: the-local-pool
+spec:
+  selector:
+    app: the-local-app
+  ports:
+    - name: http
+      protocol: TCP
+      port: 9090
+      targetPort: 9090
+  type: LoadBalancer
+  externalTrafficPolicy: Local
+---
+apiVersion: k8s.ovn.org/v1
+kind: EgressService
+metadata:
+  name: the-local-service
+  namespace: the-namespace
+spec:
+  sourceIPBy: "LoadBalancerIP"
+  network: "1001"
+  nodeSelector:
+    matchLabels:
+      vrf: "true"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: the-cluster-deployment
+  namespace: the-namespace
+  labels:
+    app: the-cluster-app
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: the-cluster-app
+  template:
+    metadata:
+      labels:
+        app: the-cluster-app
+    spec:
+      containers:
+      - name: agnhost
+        image: registry.k8s.io/e2e-test-images/agnhost:2.31
+        command:
+          - /agnhost
+          - netexec
+          - --http-port=9090
+        ports:
+        - containerPort: 9090
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: the-cluster-service
+  namespace: the-namespace
+  annotations:
+    metallb.universe.tf/address-pool: the-cluster-pool
+spec:
+  selector:
+    app: the-cluster-app
+  ports:
+    - name: http
+      protocol: TCP
+      port: 9090
+      targetPort: 9090
+  type: LoadBalancer
+  externalTrafficPolicy: Cluster
+---
+apiVersion: k8s.ovn.org/v1
+kind: EgressService
+metadata:
+  name: the-cluster-service
+  namespace: the-namespace
+spec:
+  sourceIPBy: "LoadBalancerIP"
+  network: "1001"
+  nodeSelector:
+    matchLabels:
+      vrf: "true"
